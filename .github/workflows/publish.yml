@@ -6,6 +6,9 @@ on:
       - 'v*.*.*'
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   publish:
     runs-on: ubuntu-latest
@@ -24,11 +27,13 @@ jobs:
       - name: Extract version from tag
         id: version
         run: |
-          VERSION="${GITHUB_REF#refs/tags/v}"
+          VERSION="${GITHUB_REF#refs/tags/}"
           if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
-            echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+            echo "version=${VERSION#v}" >> "$GITHUB_OUTPUT"
+            echo "tag=${VERSION}" >> "$GITHUB_OUTPUT"
           else
             echo "version=0.0.0" >> "$GITHUB_OUTPUT"
+            echo "tag=v0.0.0" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Publish to ClawHub
@@ -49,6 +54,27 @@ jobs:
             --version "${VERSION}" \
             --tags "latest,elevenlabs,tts,audio,voice,mcp,ai,cli" \
             --changelog "Release v${VERSION}"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: Skill ${{ steps.version.outputs.tag }}
+          body: |
+            ## elevenlabs-cli Skill ${{ steps.version.outputs.tag }}
+            
+            This skill provides AI assistants with access to the ElevenLabs CLI for text-to-speech, voice cloning, and audio operations.
+            
+            ### Installation
+            
+            Install via ClawHub:
+            ```bash
+            clawhub install elevenlabs-cli
+            ```
+            
+            See the main release for full changelog: https://github.com/hongkongkiwi/elevenlabs-cli/releases/tag/${{ steps.version.outputs.tag }}
+          draft: false
+          prerelease: false
 
       - name: Verify publication
         run: |
