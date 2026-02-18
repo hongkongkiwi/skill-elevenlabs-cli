@@ -16,6 +16,8 @@ metadata:
 
 A comprehensive command-line interface for the ElevenLabs AI audio platform with 100% SDK coverage. Generate speech, transcribe audio, clone voices, and more.
 
+This guide is CLI-first for LLM agents: invoke the `elevenlabs` binary directly with explicit commands, flags, and file paths.
+
 ## External Endpoints
 
 This skill instructs the CLI to call the following external services:
